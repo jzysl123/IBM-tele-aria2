@@ -1,0 +1,29 @@
+name: IBM Cloud Auto start
+
+on:
+#  push:
+#    branches: [ master ]
+#  pull_request:
+#    branches: [ master ]
+  schedule:
+    - cron: 10 24 * * *
+  workflow_dispatch:
+    inputs:
+
+jobs:
+  ibm-cloud-start:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Cloud Foundry CLI
+      run: |
+        curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github&version=v6" | tar -zx
+        sudo mv cf /usr/local/bin
+      
+    - name: Login Cloud Foundry
+      run: cf l -a https://api.${{ secrets.IBM_RGN }}.cf.cloud.ibm.com login -u ${{ secrets.IBM_MAIL }} -p ${{ secrets.IBM_PWD }}
+      
+    - name: start Cloud Foundry APP
+      run: cf start ${{ secrets.IBM_APP_NAME }}
